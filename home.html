@@ -1,36 +1,20 @@
 <div id="container-user d-flex flex-row justify-content-between px-3 py-4">
   <div class="container-user d-flex flex-row justify-content-between px-3 py-4">
     <div class="content-text flex-column w-100">
-      <p class="bodytext2 color-black500 p-0 m-0" id="dataName">
-        Selamat datang
-      </p>
+      <p class="bodytext2 color-black500 p-0 m-0" id="dataName">Selamat datang</p>
       <p class="headline6 color-black500 semibold p-0 m-0">App Toko Online</p>
     </div>
     <a class="content-image-profile flex-shrink" href="profile">
       <div class="frame-image">
-        <img
-          src="assets/images/user.png"
-          alt="profile"
-          srcset=""
-          id="dataImage"
-        />
+        <img src="./assets/images/user.png" alt="profile" srcset="" id="dataImage" />
       </div>
     </a>
   </div>
-  <form
-    class="form-search container-search mx-3 mb-4 d-flex justify-content-between align-items-center"
-    style="height: 48px"
-  >
+  <form class="form-search container-search mx-3 mb-4 d-flex justify-content-between align-items-center" style="height: 48px">
     <div class="input-group-search bg-white h-100">
-      <input
-        type="text"
-        name="search"
-        id="search"
-        class="bodytext1 color-black800"
-        placeholder="Cari barang di sini ..."
-        required
-      />
+      <input type="text" name="search" id="search" class="bodytext1 color-black800" placeholder="Cari barang di sini ..." required />
     </div>
+
     <button
       type="button"
       onclick="search"
@@ -41,9 +25,6 @@
     </button>
   </form>
   <div class="container-products w-100">
-    <div
-      id="load_data"
-      class="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-2 py-2"
-    ></div>
+    <div id="load_data" class="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-2 py-2"></div>
   </div>
 </div>

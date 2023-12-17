@@ -1,4 +1,8 @@
-// Routing Halaman Utama yaitu Home
+// Format Currency
+function numFormat(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+// Route Index Pages
 $(document).ready(function () {
   home();
   $("#home").addClass("active");
@@ -6,6 +10,7 @@ $(document).ready(function () {
   $("#profil").removeClass("active");
 });
 
+// Route Home.html
 function home() {
   $.ajax({
     type: "GET",
@@ -22,6 +27,7 @@ function home() {
   });
 }
 
+// Route Katalog.html
 function katalog() {
   $.ajax({
     type: "GET",
@@ -38,6 +44,7 @@ function katalog() {
   });
 }
 
+// Route Profil.html
 function profil() {
   $.ajax({
     type: "GET",
@@ -53,8 +60,7 @@ function profil() {
   });
 }
 
-// Sweat allert Info Aplikasi
-
+// Buka sweatalert
 function info() {
   Swal.fire({
     title: "Info",
@@ -65,13 +71,15 @@ function info() {
   });
 }
 
-// Get data from api
+// Muat produk menggunakan ajax dengan query search
 function fetch() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchTerm = urlParams.get("search");
+
+  // console.log(searchTerm);
   $.ajax({
     type: "GET",
-    url:
-      "http://localhost/api_toko_online/produk/list?search=" +
-      $("#search").val(),
+    url: "http://localhost:8080/produk?search=" + searchTerm,
     dataType: "JSON",
     success: function (response) {
       $("#load_data").html("");
@@ -80,17 +88,10 @@ function fetch() {
         $.each(response.data, function (i, v) {
           card_data += ` <a class="product-items w-50 flex-column" 
           href="javascript:void(0)" onclick="dialog('${v.id}');">          
-            <div class="product-cover mb-2" style="background-image: url('${
-              v.img
-            }');"></div>
+            <div class="product-cover mb-2" style="background-image: url('${v.img}');"></div>
             <p class="bodytext1 semibold m-0 px-2 text-secondary">${v.nama}</p>
-            <p class="bodytext2 color-black300 m-0 px-2">${v.deskripsi.substring(
-              0,
-              40
-            )}</p>
-            <p class="caption m-0 py-1 px-2 text-primary">Rp. ${numFormat(
-              v.harga
-            )}</p>
+            <p class="bodytext2 color-black300 m-0 px-2">${v.deskripsi.substring(0, 40)}</p>
+            <p class="caption m-0 py-1 px-2 text-primary">Rp. ${numFormat(v.harga)}</p>
             </a>`;
           $("#load_data").html(card_data);
         });
@@ -103,12 +104,7 @@ function fetch() {
   });
 }
 
-// Format Currency
-function numFormat(x) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-// new m12
+// Buka Modal Tambah produk
 function mdOpen() {
   $("#md-barang").modal("show");
   $("#md-barang-title").html("Tambah Barang");
@@ -116,18 +112,18 @@ function mdOpen() {
   $("#form-barang")[0].reset();
 }
 
+// Tambah Produk
 $(function () {
-  // when the form is submitted
   $("#form-barang").on("submit", function (e) {
-    // if the validator does not prevent form submit
     if (!e.isDefaultPrevented()) {
       Swal.fire("Sedang menyimpan data");
       Swal.showLoading();
       $("#btnSubmit").text("Menyimpan...");
       $("#btnSubmit").attr("disabled", true);
       var formData = new FormData($("#form-barang")[0]);
+
       $.ajax({
-        url: "http://localhost/api_toko_online/produk/simpan",
+        url: "http://localhost:8080/produk",
         type: "POST",
         data: formData,
         contentType: false,
@@ -159,6 +155,7 @@ $(function () {
   });
 });
 
+// Buka form edit
 function dialog(id) {
   $("#md-dialog").modal("show");
   $("#btnEdit").attr("data-id", id);
@@ -173,7 +170,7 @@ function edit(id) {
   $("#image").attr("required", false);
   $.ajax({
     type: "GET",
-    url: "http://localhost/api_toko_online/produk/detail/" + id,
+    url: "http://localhost:8080/produk/" + id,
     dataType: "JSON",
     success: function (response) {
       if (response.status) {
@@ -192,10 +189,11 @@ function edit(id) {
   });
 }
 
+// Hapus Produk berdasarkan id
 function hapus(id) {
   Swal.fire({
     title: "Data Barang Akan Dihapus?",
-    text: "Data yang di hapus tidak dapat di kembalikan",
+    text: "Data yang dihapus tidak dapat dikembalikan",
     icon: "question",
     showCancelButton: true,
     confirmButtonText: "Hapus",
@@ -204,13 +202,22 @@ function hapus(id) {
     cancelButtonColor: "#d33",
   }).then((result) => {
     if (result.isConfirmed) {
-      Swal.fire("Sedang menghapus data");
-      Swal.showLoading();
+      Swal.fire({
+        text: "Sedang menghapus data",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
       $.ajax({
-        type: "GET",
-        url: "http://localhost/api_toko_online/produk/hapus/" + id,
+        type: "DELETE",
+        url: "http://localhost:8080/produk/" + id,
         dataType: "JSON",
         success: function (response) {
+          Swal.close();
+
           if (response.status) {
             Swal.fire({
               text: response.message,
@@ -226,6 +233,15 @@ function hapus(id) {
               confirmButtonText: "Ok",
             });
           }
+        },
+
+        error: function (xhr, status, error) {
+          Swal.close();
+          Swal.fire({
+            text: "Terjadi kesalahan saat menghapus data.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
         },
       });
     }
