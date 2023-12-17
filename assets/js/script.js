@@ -112,7 +112,7 @@ function mdOpen() {
   $("#form-barang")[0].reset();
 }
 
-// Tambah Produk
+// Tambah & Edit Produk
 $(function () {
   $("#form-barang").on("submit", function (e) {
     if (!e.isDefaultPrevented()) {
