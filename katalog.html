@@ -10,10 +10,14 @@
       class="h-100 d-flex align-items-center justify-content-center button-search ml-3"
       style="width: 48px"
     >
-      <i class="fi fi-br-search text-white" onclick="fetch();"></i>
+      <!--  <i class="fi fi-br-search text-white" onclick="fetch();"></i>-->
+
+      <i class="fi fi-br-search text-white" onclick="searchHandler();"></i>
     </button>
   </form>
   <div class="container-products w-100">
     <div id="load_data" class="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-2 py-2"></div>
+    <!--Add new Script-->
+    <div id="load_data_message" class="container-product d-flex justifycontent-start d-flex w-100 flex-wrap px-2 py-2"></div>
   </div>
 </div>

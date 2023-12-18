@@ -1,4 +1,82 @@
-// Format Currency
+let limit = 4; //jumlah data yang ditampilkan pertama
+let start = 0;
+let action = "inactive";
+let search = "";
+let result = 1; // Format Currency
+
+function fetch_data(limit, start, search) {
+  $.ajax({
+    url: "http://localhost:8080/produk/limit_produk",
+    method: "POST",
+    data: {
+      limit: limit,
+      start: start,
+      search: search,
+    },
+    dataType: "JSON",
+    cache: false,
+    success: function (response) {
+      result = response.result;
+      if (response.status) {
+        let card_data = "";
+        $.each(response.data, function (i, v) {
+          card_data = ` <a class="product-items w-50 flex-column" href="javascript:void(0)" onclick="dialog('${v.id}');">
+                          <div class="product-cover mb-2" style="background-image:
+                          url('${v.img}');"></div>
+                          <p class="bodytext1 semibold m-0 px-2 text-secondary">${v.nama}</p>
+                          <p class="bodytext2 color-black300 m-0 px2">${v.deskripsi.substring(0, 40)}</p>
+                          <p class="caption m-0 py-1 px-2 text-primary">Rp.
+                          ${numFormat(v.harga)}</p>
+                          </a>`;
+          $("#load_data").append(card_data);
+        });
+        action = "inactive";
+        $("#load_data_message").html("");
+      } else {
+        $("#load_data").html("");
+        $("#load_data_message").html(
+          '<div class="col-12 text-center"><h4 class="text-danger">Oops, barang yang anda cari tidak di temukan</h4></div>'
+        );
+        action = "active";
+      }
+    },
+  });
+}
+
+function lazzy_loader(limit) {
+  var output = "";
+  for (var count = 0; count < limit; count++) {
+    output += `
+  <a class="product-items w-50 flex-column shimmer"
+  href="javascript:void(0)">
+  <div class="product-cover animate mb-2" ></div>
+  <p class="bodytext1 semibold m-0 px-2 text-secondary animate
+  mb-2"></p>
+  <p class="bodytext2 color-black300 m-0 px-2 animate mb2"></p>
+  <p class="caption m-0 py-1 px-2 text-primary animate"></p>
+  </a>`;
+  }
+  $("#load_data_message").html(output);
+}
+
+$(window).scroll(function () {
+  if ($(window).scrollTop() + $(window).height() > $("#load_data").height() && action == "inactive" && result == 1) {
+    lazzy_loader(limit);
+    action = "active";
+    start = start + limit;
+    setTimeout(function () {
+      fetch_data(limit, start, search);
+    }, 1000);
+  }
+});
+
+function searchHandler() {
+  $("#load_data").html("");
+  search = $("#search").val();
+  fetch_data(limit, start, search);
+}
+
+// Currency
 function numFormat(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -10,6 +88,51 @@ $(document).ready(function () {
   $("#profil").removeClass("active");
 });
 
+function home() {
+  $.ajax({
+    type: "GET",
+    url: "home.html",
+    data: "data",
+    dataType: "html",
+    success: function (response) {
+      $("#content").html(response);
+      $("#home").addClass("active");
+      $("#katalog").removeClass("active");
+      $("#profil").removeClass("active");
+      $("#load_data").html("");
+      start = 0;
+      lazzy_loader(limit);
+      if (action == "inactive") {
+        action = "active";
+        fetch_data(limit, start, search);
+      }
+    },
+  });
+}
+
+function katalog() {
+  $.ajax({
+    type: "GET",
+    url: "katalog.html",
+    data: "data",
+    dataType: "html",
+    success: function (response) {
+      $("#content").html(response);
+      $("#home").removeClass("active");
+      $("#katalog").addClass("active");
+      $("#profil").removeClass("active");
+      $("#load_data").html("");
+      start = 0;
+      lazzy_loader(limit);
+      if (action == "inactive") {
+        action = "active";
+        fetch_data(limit, start, search);
+      }
+    },
+  });
+}
+
+/*
 // Route Home.html
 function home() {
   $.ajax({
@@ -22,7 +145,7 @@ function home() {
       $("#home").addClass("active");
       $("#katalog").removeClass("active");
       $("#profil").removeClass("active");
-      fetch();
+      fetch_data();
     },
   });
 }
@@ -39,10 +162,10 @@ function katalog() {
       $("#home").removeClass("active");
       $("#katalog").addClass("active");
       $("#profil").removeClass("active");
-      fetch();
+      fetch_data();
     },
   });
-}
+}*/
 
 // Route Profil.html
 function profil() {
@@ -71,8 +194,9 @@ function info() {
   });
 }
 
+/*
 // Muat produk menggunakan ajax dengan query search
-function fetch() {
+function fetch_data() {
   const urlParams = new URLSearchParams(window.location.search);
   const searchTerm = urlParams.get("search");
 
@@ -102,7 +226,7 @@ function fetch() {
       }
     },
   });
-}
+} */
 
 // Buka Modal Tambah produk
 function mdOpen() {
@@ -133,7 +257,7 @@ $(function () {
           if (data.status) {
             $("#form-barang")[0].reset();
             $("#md-barang").modal("hide");
-            fetch();
+            fetch_data();
             Swal.fire({
               text: data.message,
               icon: "success",
@@ -175,6 +299,7 @@ function edit(id) {
     success: function (response) {
       if (response.status) {
         $("#id").val(response.data.id);
+        $("#kategori").val(response.data.kategori);
         $("#nama").val(response.data.nama);
         $("#harga").val(response.data.harga);
         $("#deskripsi").val(response.data.deskripsi);
@@ -224,7 +349,7 @@ function hapus(id) {
               icon: "success",
               confirmButtonText: "Ok",
             });
-            fetch();
+            fetch_data();
             $("#md-dialog").modal("hide");
           } else {
             Swal.fire({
