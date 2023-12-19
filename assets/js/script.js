@@ -3,8 +3,56 @@ let start = 0;
 let action = "inactive";
 let search = "";
 let result = 1; // Format Currency
+let kategori = "";
 
-function fetch_data(limit, start, search) {
+// fetch kategori pada katalog
+
+function kategori_view() {
+  $.ajax({
+    url: "http://localhost:8080/kategori",
+    method: "GET",
+    dataType: "JSON",
+    cache: false,
+    success: function (response) {
+      result = response.result;
+      if (response.status) {
+        $.each(response.data, function (i, kt) {
+          button = `<button onclick="katalogByKategori(${kt.id});" class="btn btn-sm btn-primary mr-1"> ${kt.nama}</button>`;
+          $("#kategoriButton").append(button);
+        });
+
+        action = "inactive";
+      }
+    },
+  });
+}
+
+// Produk by id
+function katalogByKategori(kategori) {
+  $.ajax({
+    type: "GET",
+    url: "katalog.html",
+    data: "data",
+    dataType: "html",
+    success: function (response) {
+      $("#content").html(response);
+      $("#home").removeClass("active");
+      $("#katalog").addClass("active");
+      $("#profil").removeClass("active");
+      $("#load_data").html("");
+      start = 0;
+      lazzy_loader(limit);
+
+      fetch_data(limit, start, search, kategori);
+
+      // Tampilkan kategori
+      kategori_view();
+    },
+  });
+}
+
+function fetch_data(limit, start, search, kategori) {
+  console.log("POST data:", { limit: limit, start: start, search: search, kategori: kategori });
   $.ajax({
     url: "http://localhost:8080/produk/limit_produk",
     method: "POST",
@@ -12,6 +60,7 @@ function fetch_data(limit, start, search) {
       limit: limit,
       start: start,
       search: search,
+      kategori: kategori,
     },
     dataType: "JSON",
     cache: false,
@@ -25,6 +74,7 @@ function fetch_data(limit, start, search) {
                           url('${v.img}');"></div>
                           <p class="bodytext1 semibold m-0 px-2 text-secondary">${v.nama}</p>
                           <p class="bodytext2 color-black300 m-0 px2">${v.deskripsi.substring(0, 40)}</p>
+                          <p class="bodytext2 color-black300 m-0 px2">Kategori: ${v.kategori.substring(0, 40)}</p>
                           <p class="caption m-0 py-1 px-2 text-primary">Rp.
                           ${numFormat(v.harga)}</p>
                           </a>`;
@@ -65,7 +115,7 @@ $(window).scroll(function () {
     action = "active";
     start = start + limit;
     setTimeout(function () {
-      fetch_data(limit, start, search);
+      fetch_data(limit, start, search, kategori);
     }, 1000);
   }
 });
@@ -73,7 +123,7 @@ $(window).scroll(function () {
 function searchHandler() {
   $("#load_data").html("");
   search = $("#search").val();
-  fetch_data(limit, start, search);
+  fetch_data(limit, start, search, kategori);
 }
 
 // Currency
@@ -104,7 +154,7 @@ function home() {
       lazzy_loader(limit);
       if (action == "inactive") {
         action = "active";
-        fetch_data(limit, start, search);
+        fetch_data(limit, start, search, kategori);
       }
     },
   });
@@ -126,8 +176,10 @@ function katalog() {
       lazzy_loader(limit);
       if (action == "inactive") {
         action = "active";
-        fetch_data(limit, start, search);
+        fetch_data(limit, start, search, kategori);
       }
+      // Tampilkan kategori
+      kategori_view();
     },
   });
 }
